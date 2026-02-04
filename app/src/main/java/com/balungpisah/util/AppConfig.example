@@ -1,0 +1,29 @@
+package com.balungpisah.util
+
+enum class AppEnvironment {
+    DEVELOPMENT,
+    PRODUCTION
+}
+
+object AppConfig {
+    val environment: AppEnvironment = AppEnvironment.PRODUCTION // Change to DEVELOPMENT for dev
+    
+    const val API_BASE_URL = "http://host:port" // host and port for balungpisah-core
+    const val LOGTO_ENDPOINT = "http://host:port" // host and port for logto 
+    const val API_VERSION = "v1"
+    const val LOGTO_APP_ID = "<logto_app_id>" // login to logto console to get app id
+    const val LOGTO_APP_SECRET = "<logto_app_secret>" // login to logto, create m2m connector, get app_id and app secret
+    const val MAX_ATTACHMENT = 5
+    
+    // File upload settings
+    const val MAX_FILE_SIZE_MB = 10
+    const val MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+    
+    // Supported file types
+    val SUPPORTED_IMAGE_TYPES = listOf("image/jpeg", "image/jpg", "image/png", "image/webp")
+    val SUPPORTED_VIDEO_TYPES = listOf("video/mp4", "video/mpeg", "video/quicktime", "video/x-msvideo")
+    val SUPPORTED_DOCUMENT_TYPES = listOf("application/pdf")
+    
+    // Combined for file picker
+    const val FILE_PICKER_MIME_TYPES = "image/*,video/*,application/pdf"
+}
