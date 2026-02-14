@@ -1,5 +1,6 @@
 package com.balungpisah.ui.screens
 
+import android.util.Patterns
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -96,6 +97,7 @@ fun AuthScreenContent(
     var registeredEmail by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
+    var localError by remember { mutableStateOf<String?>(null) }
 
     if (showVerification && authRepository != null) {
         EmailVerificationScreen(
@@ -148,7 +150,10 @@ fun AuthScreenContent(
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { 
+                    email = it
+                    localError = null
+                },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
@@ -161,7 +166,8 @@ fun AuthScreenContent(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White
                 ),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                isError = localError != null
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -198,14 +204,19 @@ fun AuthScreenContent(
 
             Button(
                 onClick = {
-                    val trimmedEmail = email.trim().lowercase()
+                    val trimmedEmail = email.trim()
+                    if (!Patterns.EMAIL_ADDRESS.matcher(trimmedEmail).matches()) {
+                        localError = "Format email tidak valid"
+                        return@Button
+                    }
+                    val lowercasedEmail = trimmedEmail.lowercase()
                     if (isSignUp) {
-                        onRegister(trimmedEmail, password) {
+                        onRegister(lowercasedEmail, password) {
                             registeredEmail = email
                             showVerification = true
                         }
                     } else {
-                        onLogin(trimmedEmail, password)
+                        onLogin(lowercasedEmail, password)
                     }
                 },
                 modifier = Modifier
@@ -242,13 +253,26 @@ fun AuthScreenContent(
             Spacer(modifier = Modifier.height(32.dp))
         }
 
-        if (error != null) {
+        val currentError = localError ?: error?.message
+        if (currentError != null) {
             AlertDialog(
-                onDismissRequest = onClearError,
+                onDismissRequest = {
+                    if (localError != null) {
+                        localError = null
+                    } else {
+                        onClearError()
+                    }
+                },
                 title = { Text("Error") },
-                text = { Text(error.message ?: "Terjadi kesalahan") },
+                text = { Text(currentError) },
                 confirmButton = {
-                    TextButton(onClick = onClearError) {
+                    TextButton(onClick = {
+                        if (localError != null) {
+                            localError = null
+                        } else {
+                            onClearError()
+                        }
+                    }) {
                         Text("OK")
                     }
                 }
